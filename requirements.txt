@@ -1,0 +1,5 @@
+nose
+sphinx
+sphinx_rtd_theme
+pandas>=0.22.0
+rdflib>=4.2.2
