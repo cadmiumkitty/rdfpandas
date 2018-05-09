@@ -24,9 +24,9 @@ copyright = '2018, Eugene Morozov'
 author = 'Eugene Morozov'
 
 # The short X.Y version
-version = 'v1.0.0'
+version = 'v0.1.0'
 # The full version, including alpha/beta/rc tags
-release = 'v1.0.0'
+release = 'v0.1.0'
 
 
 # -- General configuration ---------------------------------------------------

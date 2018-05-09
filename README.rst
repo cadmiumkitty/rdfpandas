@@ -1,9 +1,9 @@
 RdfPandas
 =========
 
-RdfPandas is a module providing RDF support for Pandas. It consists of 
-two simple functions for graph conversion, one is to create DataFrame from 
-RDFLib Graph data, and another one to create Graph data from DataFrame. 
+RdfPandas is a module providing RDF support for Pandas. It consists initially 
+of a simple function for graph conversion to create RDFLib Graph data from 
+Pandas DataFrame.
 
 The graph data can then be serialized using RDFLib serialize method on the 
 graph.
