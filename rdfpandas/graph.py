@@ -1,6 +1,8 @@
 # -*- coding: utf-8 -*-
 import pandas as pd
 import rdflib
+import logging
+
 
 def to_graph(df: pd.DataFrame) -> rdflib.Graph:
     """
@@ -22,26 +24,15 @@ def to_graph(df: pd.DataFrame) -> rdflib.Graph:
     
     g = rdflib.Graph()
     
-    return g
-
-def from_graph(g: rdflib.Graph) -> pd.DataFrame:
-    """
-    Takes RDFLib Graph and returns Pandas DataFrame using subjects as row 
-    indices and predicates as column indices. Object types are inferred from 
-    the object types.
-
-    Parameters
-    ----------
-    g : rdflib.Graph
-        Graph to be converted into Pandas DataFrame
-
-    Returns
-    -------
-    pandas.DataFrame
-        DataFrame created from Graph.
+    for (index, series) in df.iterrows():
+        for (column, value) in series.iteritems():
+            if (type(value) == 'bytes'):
+                g.add((rdflib.URIRef(index),
+                       rdflib.URIRef(column), 
+                       rdflib.Literal(value.decode('utf-8'))))
+            else:
+                g.add((rdflib.URIRef(index),
+                       rdflib.URIRef(column), 
+                       rdflib.Literal(value)))
         
-    """
-    
-    df = pd.DataFrame()
-    
-    return df
+    return g
