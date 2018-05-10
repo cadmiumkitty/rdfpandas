@@ -11,13 +11,13 @@ with open('LICENSE') as f:
 
 setup(
     name='rdfpandas',
-    version='0.1.0',
+    version='0.1.1',
     description='RDF support for Pandas',
     long_description=readme,
     author='Eugene Morozov',
     author_email='emorozov@gmail.com',
     url='https://github.com/cadmiumkitty/rdfpandas',
-    license=license,
+    license='MIT',
     packages=find_packages(exclude=('tests', 'docs'))
 )
 
