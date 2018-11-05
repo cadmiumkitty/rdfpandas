@@ -36,9 +36,10 @@ Getting RDF out of the DataFrame
 
 ::
 
-  import rdfpandas as pd
+  import rdfpandas.graph
+  import pandas as pd
   import rdflib
-  
+ 
   df = pd.DataFrame()
   g = to_graph(df)
   s = g.serialize(format='turtle')
