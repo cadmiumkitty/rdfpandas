@@ -1,5 +1,6 @@
 nose
 sphinx
 sphinx_rtd_theme
-pandas>=0.22.0
-rdflib>=4.2.2
+numpy>=1.20.0rc2
+pandas>=1.2.0
+rdflib>=5.0.0
