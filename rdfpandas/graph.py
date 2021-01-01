@@ -2,7 +2,7 @@
 import pandas as pd
 from rdflib import Graph, Literal, URIRef, BNode
 from rdflib.term import Identifier
-from rdflib.namespace import XSD
+from rdflib.namespace import NamespaceManager
 import logging
 import re
 
@@ -33,18 +33,15 @@ def to_graph(df: pd.DataFrame) -> Graph:
 
     for (index, series) in df.iterrows():
         for (column, value) in series.iteritems():
-            match = re.search('([\w:]*)(\{(\d*)\})?(\[(\d*)\])?(\((.\w*)\))?(@(.\w*))?', column)
-            instance = match.group(3)
-            datatype = match.group(7)
-            language = match.group(9)
+            match = re.search('([\w?:/.]*)(\{(\w*)\})?(\[(\d*)\])?(\(([\w?:/.]*)\))?(@(\w*))?', column)
 
             s = _get_identifier(index[0])
-            p = _get_identifier(column)
+            p = _get_identifier(match.group(1))
 
             if isinstance(value, bytes):
-                o = _get_identifier(value.decode('utf-8'), instance, datatype, language)
+                o = _get_identifier(value.decode('utf-8'), match.group(3), match.group(7), match.group(9))
             else:
-                o = _get_identifier(value, instance, datatype, language)
+                o = _get_identifier(value, match.group(3), match.group(7), match.group(9))
 
             g.add((s, p, o))
 
@@ -86,7 +83,7 @@ def to_dataframe(g: Graph) -> pd.DataFrame:
             subjects[s] = s
             s_predicates = {}
             for p, o in sorted(g.predicate_objects(s)):
-                idl = _idl_for_identifier(o)
+                idl = _get_idl_for_identifier(o)
                 if p in s_predicates:
                     if idl in s_predicates[p]:
                         s_predicates[p][idl] = s_predicates[p][idl] + 1
@@ -114,36 +111,36 @@ def to_dataframe(g: Graph) -> pd.DataFrame:
             language = idl[2]
             idl_len = predicates[p][idl]
             for index in range(idl_len):
-                series_name = f'{g.namespace_manager.normalizeUri(p)}{{{instance}}}'
+                series_name = f'{_get_str_for_uri(g.namespace_manager, p)}{{{instance}}}'
                 if idl_len > 1:
                     series_name = ''.join([series_name, f'[{index}]'])
                 if datatype:
-                    series_name = ''.join([series_name, f'({g.namespace_manager.normalizeUri(datatype)})'])
+                    series_name = ''.join([series_name, f'({_get_str_for_uri(g.namespace_manager, datatype)})'])
                 if language:
                     series_name = ''.join([series_name, f'@{language}'])
                 p_subjects = []
                 p_objects = []
                 if idls_len == 1 and idl_len == 1:
                     for s, o in sorted(g.subject_objects(p)):
-                        p_subjects.append(g.namespace_manager.normalizeUri(s))
+                        p_subjects.append(_get_str_for_uri(g.namespace_manager, s))
                         if isinstance(o, Literal):
                             p_objects.append(o)
                         else:
-                            p_objects.append(g.namespace_manager.normalizeUri(o))
+                            p_objects.append(_get_str_for_uri(g.namespace_manager, o))
                 else:
                     s_index = 0
                     last_seen_subject = None
                     for s, o in sorted(g.subject_objects(p)):
                         if last_seen_subject and s != last_seen_subject:
                             s_index = 0
-                        o_idl = _idl_for_identifier(o)
+                        o_idl = _get_idl_for_identifier(o)
                         if o_idl == idl:
                             if s_index == index:
-                                p_subjects.append(g.namespace_manager.normalizeUri(s))
+                                p_subjects.append(_get_str_for_uri(g.namespace_manager, s))
                                 if isinstance(o, Literal):
                                     p_objects.append(o)
                                 else:
-                                    p_objects.append(g.namespace_manager.normalizeUri(o))
+                                    p_objects.append(_get_str_for_uri(g.namespace_manager, o))
                                 last_seen_subject = s
                             s_index = s_index + 1
                 series[series_name] = pd.Series(p_objects, p_subjects, 'string')
@@ -180,35 +177,34 @@ def _get_identifier(value: str, instance: str = None, datatype: str = None, lang
     if not instance:
         if re.match('^\w*:\w*$', str(value)) or re.match('^http[s]?://.*$', str(value)):
             return URIRef(value)
-        if datatype and language:
-            return Literal(value, datatype = XSD[datatype], language = language)
-        if datatype:
-            return Literal(value, datatype = XSD[datatype])
-        if language:
-            return Literal(value, language = language)
-        return Literal(value)
+        elif language:
+            return Literal(value, lang = language)
+        elif datatype:
+            return Literal(value, datatype = URIRef(datatype))
+        else:
+            return Literal(value)
     elif instance == Literal.__name__:
-        if datatype and language:
-            return Literal(value, datatype = XSD[datatype], language = language)
-        if datatype:
-            return Literal(value, datatype = XSD[datatype])
         if language:
-            return Literal(value, language = language)
+            return Literal(value, lang = language)
+        elif datatype:
+            return Literal(value, datatype = URIRef(datatype))
+        else:
+            return Literal(value)
     elif instance == URIRef.__name__:
         return URIRef(value)
     elif instance == BNode.__name__:
         return BNode(value)
 
-    raise ValueError('Can only create Literal, URIRef or BNode')
+    raise ValueError(f'Can only create Literal, URIRef or BNode but was {instance}')
 
-def _idl_for_identifier(o: Identifier) -> tuple:
+def _get_idl_for_identifier(i: Identifier) -> tuple:
     """
     Takes rdfLib Identifier, and returns a tuple of 
     instance name (Literal, URIRef or BNode), datatype (XSD type) and language.
 
     Parameters
     ----------
-    o : rdflib.term.Identifier
+    i : rdflib.term.Identifier
         rdfLib Identifier (parent of BNode, Literal or URIRef).
 
     Returns
@@ -218,11 +214,33 @@ def _idl_for_identifier(o: Identifier) -> tuple:
 
     """
 
-    instance = o.__class__.__name__
+    instance = i.__class__.__name__
     datatype = None
     language = None
-    if isinstance(o, Literal):
-        datatype = o.datatype
-        language = o.language
+    if isinstance(i, Literal):
+        datatype = i.datatype
+        language = i.language
 
     return (instance, datatype, language)
+
+def _get_str_for_uri(namespace_manager: NamespaceManager, uri: URIRef) -> str:
+    """
+    Reusing NamespaceManager.normalizeUri for transforming Graph to DataFrame.
+    In effect we only need to strip < and > from N3 representation and
+    forget the case of URIRef being a rdflib.term.Variable.
+
+    Parameters
+    ----------
+    namespace_manager : rdflib.namespace.NamespaceManager
+        NamespaceManager to use to normalize URIs
+    uri : rdflib.URIRef
+        NamespaceManager to use to normalize URIs
+
+    Returns
+    -------
+    str
+        Normalised URI string.
+
+    """
+
+    return re.sub('<|>', '', namespace_manager.normalizeUri(uri))
