@@ -20,13 +20,13 @@ sys.path.insert(0, os.path.relpath('../../rdfpandas'))
 # -- Project information -----------------------------------------------------
 
 project = 'rdfpandas'
-copyright = '2018, Eugene Morozov'
+copyright = '2020, Eugene Morozov'
 author = 'Eugene Morozov'
 
 # The short X.Y version
-version = 'v0.1.1'
+version = 'v1.0.0'
 # The full version, including alpha/beta/rc tags
-release = 'v0.1.1'
+release = 'v1.0.0'
 
 
 # -- General configuration ---------------------------------------------------

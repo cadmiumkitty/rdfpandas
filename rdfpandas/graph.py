@@ -1,10 +1,12 @@
 # -*- coding: utf-8 -*-
 import pandas as pd
-import rdflib
-import rdflib.namespace
+from rdflib import Graph, Literal, URIRef, BNode
+from rdflib.term import Identifier
+from rdflib.namespace import XSD
 import logging
+import re
 
-def to_graph(df: pd.DataFrame, prefixes: dict) -> rdflib.Graph:
+def to_graph(df: pd.DataFrame) -> Graph:
     """
     Takes Pandas DataFrame and returns RDFLib Graph.
     Row indices are used as subjects and column indices as predicates. 
@@ -12,15 +14,13 @@ def to_graph(df: pd.DataFrame, prefixes: dict) -> rdflib.Graph:
     "predicate{rdfLib Identifier instance class name}(type)[index]@language".
     Index numbers simply create additoinal statements as opposed 
     to attempting to construct a new rdfs:List or rdfs:Container.
+    Namespaces need to be bound by the user of the method prior
+    to serialization.
 
     Parameters
     ----------
     df : pandas.DataFrame
         DataFrame to be converted into Graph.
-    prefixes : dict
-        Dictionary of prefixes to be used for CURIE deconstruction.
-        for example {'skos': 'http://www.w3.org/2004/02/skos/core#'}
-        or alternatively {'skos': rdflib.namespace.SKOS.uri}
 
     Returns
     -------
@@ -29,34 +29,29 @@ def to_graph(df: pd.DataFrame, prefixes: dict) -> rdflib.Graph:
 
     """
     
-    g = rdflib.Graph()
-    
+    g = Graph()
+
     for (index, series) in df.iterrows():
         for (column, value) in series.iteritems():
+            match = re.search('([\w:]*)(\{(\d*)\})?(\[(\d*)\])?(\((.\w*)\))?(@(.\w*))?', column)
+            instance = match.group(3)
+            datatype = match.group(7)
+            language = match.group(9)
 
-            ## Parse column
+            s = _get_identifier(index[0])
+            p = _get_identifier(column)
 
-            ## If value
-
-                ## Get URI Node for index
-                ## Get URI Node for column name
-                ## If column has language => check if type is string or missing => Literal string with language
-                ## Else If column has type => Literal with type
-                ## Else If Get URI Node for value => URI
-                ## Else => Literal with defaults
-
-            if (type(value) == 'bytes'):
-                g.add((rdflib.URIRef(index),
-                       rdflib.URIRef(column), 
-                       rdflib.Literal(value.decode('utf-8'))))
+            if isinstance(value, bytes):
+                o = _get_identifier(value.decode('utf-8'), instance, index, datatype, language)
             else:
-                g.add((rdflib.URIRef(index),
-                       rdflib.URIRef(column), 
-                       rdflib.Literal(value)))
-        
+                o = _get_identifier(value, instance, index, datatype, language)
+
+            g.add((s, p, o))
+
     return g
 
-def to_dataframe(g: rdflib.Graph) -> df: pd.DataFrame:
+
+def to_dataframe(g: Graph) -> pd.DataFrame:
     """
     Takes rdfLib Graph object and creates Pandas DataFrame.
     Indices are subjects and attempt is made to construct CURIEs
@@ -131,7 +126,7 @@ def to_dataframe(g: rdflib.Graph) -> df: pd.DataFrame:
                 if idls_len == 1 and idl_len == 1:
                     for s, o in sorted(g.subject_objects(p)):
                         p_subjects.append(g.namespace_manager.normalizeUri(s))
-                        if isinstance(o, rdflib.Literal):
+                        if isinstance(o, Literal):
                             p_objects.append(o)
                         else:
                             p_objects.append(g.namespace_manager.normalizeUri(o))
@@ -145,7 +140,7 @@ def to_dataframe(g: rdflib.Graph) -> df: pd.DataFrame:
                         if o_idl == idl:
                             if s_index == index:
                                 p_subjects.append(g.namespace_manager.normalizeUri(s))
-                                if isinstance(o, rdflib.Literal):
+                                if isinstance(o, Literal):
                                     p_objects.append(o)
                                 else:
                                     p_objects.append(g.namespace_manager.normalizeUri(o))
@@ -157,12 +152,61 @@ def to_dataframe(g: rdflib.Graph) -> df: pd.DataFrame:
 
     return pd.DataFrame(series)
 
-
-def _idl_for_identifier(o: rdflib.term.Identifier) -> tuple:
+def _get_identifier(value: str, instance: str = None, index: str = None, datatype: str = None, language: str = None) -> Identifier:
     """
-    Takes rdfLib Identifier, a parent of Literal and URIRef, and returns
-    a tuple of instance name (Literal, URIRef or BNode), datatype (URIRef of 
-    XSD type) and language.
+    Takes value extracted from the index, column or cell and returns
+    an instance of Identifier (Literal, URIRef or BNode) using correct 
+    datatype and language.
+
+    Parameters
+    ----------
+    value : str
+        Value of index, column or cell
+    instance : str
+        Name of the rdfLib Identifier class to use
+    index : str
+        Index can be ignored, but keeping here for completeness
+    datatype : str
+        Datatype of rdfLib Literal to use 
+        (see https://rdflib.readthedocs.io/en/stable/rdf_terms.html#python-support)
+    language : str
+        Language of rdfLib Literal to use 
+
+    Returns
+    -------
+    rdflib.term.Identifier
+        rdflib.term.Identifier instance - either URIRef or Literal.
+
+    """
+
+    if not instance:
+        if re.match('^\w*:\w*$', str(value)) or re.match('^http[s]?://.*$', str(value)):
+            return URIRef(value)
+        if datatype and language:
+            return Literal(value, datatype = XSD[datatype], language = language)
+        if datatype:
+            return Literal(value, datatype = XSD[datatype])
+        if language:
+            return Literal(value, language = language)
+        return Literal(value)
+    elif instance == Literal.__name__:
+        if datatype and language:
+            return Literal(value, datatype = XSD[datatype], language = language)
+        if datatype:
+            return Literal(value, datatype = XSD[datatype])
+        if language:
+            return Literal(value, language = language)
+    elif instance == URIRef.__name__:
+        return URIRef(value)
+    elif instance == BNode.__name__:
+        return BNode(value)
+
+    raise ValueError('Can only create Literal, URIRef or BNode')
+
+def _idl_for_identifier(o: Identifier) -> tuple:
+    """
+    Takes rdfLib Identifier, and returns a tuple of 
+    instance name (Literal, URIRef or BNode), datatype (XSD type) and language.
 
     Parameters
     ----------
@@ -179,7 +223,7 @@ def _idl_for_identifier(o: rdflib.term.Identifier) -> tuple:
     instance = o.__class__.__name__
     datatype = None
     language = None
-    if isinstance(o, rdflib.Literal):
+    if isinstance(o, Literal):
         datatype = o.datatype
         language = o.language
 

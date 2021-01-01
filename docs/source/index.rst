@@ -15,12 +15,9 @@ RdfPandas
 Introduction
 ============
    
-RdfPandas is a module providing RDF support for Pandas. It consists initially 
-of a simple function for graph conversion to create RDFLib Graph data from 
-Pandas DataFrame.
-
-The graph data can then be serialized using RDFLib serialize method on the 
-graph.
+RdfPandas is a module providing RDF support for Pandas. It consists of
+two simple functions for Graph to DataFrame conversion and 
+DataFrame to Graph conversion.
 
 For more details and the source code see https://github.com/cadmiumkitty/rdfpandas/
 
