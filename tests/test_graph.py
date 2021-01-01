@@ -13,14 +13,16 @@ import logging
 
 
 class ConversionTestCase(unittest.TestCase):
-    """Tests conversion from DataFrame to Graph."""
+    """Tests conversion from DataFrame to Graph and from Graph to DataFrame"""
 
     def test_should_convert_empty_data_frame_to_empty_graph(self):
         """Should return empty Graph for empty DataFrame
         """
+
         df = pd.DataFrame()
         g_expected = rdflib.Graph()
         g_result = rdfpandas.to_graph(df)
+
         self.assertEquals(rdflib.compare.isomorphic(g_expected, g_result), True)
     
     def test_should_convert_data_frame_to_graph_no_instance(self):
@@ -213,14 +215,83 @@ class ConversionTestCase(unittest.TestCase):
         
         self.assertEquals(rdflib.compare.isomorphic(g_expected, g_result), True)        
 
+
     def test_should_convert_empty_graph_to_empty_data_frame(self):
         """Should return empty DataFrame for empty Graph
         """
 
         g = rdflib.Graph()
-        df_expected = pd.DataFrame()
         df_result = rdfpandas.to_dataframe(g)
-        self.assertEquals(rdflib.compare.isomorphic(df_expected, df_result), True)
+
+        self.assertEquals(df_result.empty, True)
+
+
+    def test_should_convert_graph_to_data_frame(self):
+        """Should return DataFrame for Graph
+        """
+
+        g = rdflib.Graph()
+
+        g.add((rdflib.URIRef('http://github.com/cadmiumkitty/rdfpandas/one'),
+                        rdflib.URIRef('http://github.com/cadmiumkitty/rdfpandas/string'), 
+                        rdflib.Literal('String')))
+        g.add((rdflib.URIRef('http://github.com/cadmiumkitty/rdfpandas/one'),
+                        rdflib.URIRef('http://github.com/cadmiumkitty/rdfpandas/string'), 
+                        rdflib.Literal('String with type 0', datatype = rdflib.URIRef('xsd:string'))))
+        g.add((rdflib.URIRef('http://github.com/cadmiumkitty/rdfpandas/one'),
+                        rdflib.URIRef('http://github.com/cadmiumkitty/rdfpandas/string'), 
+                        rdflib.Literal('String with type 1', datatype = rdflib.URIRef('xsd:string'))))
+        g.add((rdflib.URIRef('http://github.com/cadmiumkitty/rdfpandas/one'),
+                        rdflib.URIRef('http://github.com/cadmiumkitty/rdfpandas/string'), 
+                        rdflib.Literal('String in Nepali', lang = 'ne')))
+        g.add((rdflib.URIRef('http://github.com/cadmiumkitty/rdfpandas/one'),
+                        rdflib.URIRef('http://github.com/cadmiumkitty/rdfpandas/string'), 
+                        rdflib.Literal('String in English 0', lang = 'en')))
+        g.add((rdflib.URIRef('http://github.com/cadmiumkitty/rdfpandas/one'),
+                        rdflib.URIRef('http://github.com/cadmiumkitty/rdfpandas/string'), 
+                        rdflib.Literal('String in English 1', lang = 'en')))
+
+        g.add((rdflib.URIRef('http://github.com/cadmiumkitty/rdfpandas/one'),
+                        rdflib.URIRef('http://github.com/cadmiumkitty/rdfpandas/integer'), 
+                        rdflib.Literal(10)))
+        g.add((rdflib.URIRef('http://github.com/cadmiumkitty/rdfpandas/one'),
+                        rdflib.URIRef('http://github.com/cadmiumkitty/rdfpandas/decimal'), 
+                        rdflib.Literal(10.00)))
+
+        g.add((rdflib.URIRef('http://github.com/cadmiumkitty/rdfpandas/one'),
+                rdflib.URIRef('http://github.com/cadmiumkitty/rdfpandas/uri'), 
+                rdflib.URIRef('http://github.com/cadmiumkitty/rdfpandas/uri')))
+        g.add((rdflib.URIRef('http://github.com/cadmiumkitty/rdfpandas/one'),
+                rdflib.URIRef('http://github.com/cadmiumkitty/rdfpandas/curie'), 
+                rdflib.URIRef('rdfpandas:curie')))
+
+        g.add((rdflib.URIRef('http://github.com/cadmiumkitty/rdfpandas/two'),
+                        rdflib.URIRef('http://github.com/cadmiumkitty/rdfpandas/anotherstring'), 
+                        rdflib.Literal('String')))
+        g.add((rdflib.URIRef('http://github.com/cadmiumkitty/rdfpandas/two'),
+                        rdflib.URIRef('http://github.com/cadmiumkitty/rdfpandas/string'), 
+                        rdflib.Literal('String with type 0', datatype = rdflib.URIRef('xsd:string'))))
+        g.add((rdflib.URIRef('http://github.com/cadmiumkitty/rdfpandas/two'),
+                        rdflib.URIRef('http://github.com/cadmiumkitty/rdfpandas/string'), 
+                        rdflib.Literal('String with type 1', datatype = rdflib.URIRef('xsd:string'))))
+        g.add((rdflib.URIRef('http://github.com/cadmiumkitty/rdfpandas/two'),
+                        rdflib.URIRef('http://github.com/cadmiumkitty/rdfpandas/string'), 
+                        rdflib.Literal('String in Nepali 0', lang = 'ne')))
+        g.add((rdflib.URIRef('http://github.com/cadmiumkitty/rdfpandas/two'),
+                        rdflib.URIRef('http://github.com/cadmiumkitty/rdfpandas/string'), 
+                        rdflib.Literal('String in Nepali 1', lang = 'ne')))
+        g.add((rdflib.URIRef('http://github.com/cadmiumkitty/rdfpandas/two'),
+                        rdflib.URIRef('http://github.com/cadmiumkitty/rdfpandas/string'), 
+                        rdflib.Literal('String in English 0', lang = 'en')))
+
+        df_expected = pd.DataFrame()
+
+        df_result = rdfpandas.to_dataframe(g)
+
+        print(df_result)
+
+        self.assertEquals(df_expected.equals(df_result), True)
+
 
 if __name__ == '__main__':
     unittest.main()
