@@ -42,9 +42,9 @@ def to_graph(df: pd.DataFrame) -> Graph:
             p = _get_identifier(column)
 
             if isinstance(value, bytes):
-                o = _get_identifier(value.decode('utf-8'), instance, index, datatype, language)
+                o = _get_identifier(value.decode('utf-8'), instance, datatype, language)
             else:
-                o = _get_identifier(value, instance, index, datatype, language)
+                o = _get_identifier(value, instance, datatype, language)
 
             g.add((s, p, o))
 
@@ -152,7 +152,7 @@ def to_dataframe(g: Graph) -> pd.DataFrame:
 
     return pd.DataFrame(series)
 
-def _get_identifier(value: str, instance: str = None, index: str = None, datatype: str = None, language: str = None) -> Identifier:
+def _get_identifier(value: str, instance: str = None, datatype: str = None, language: str = None) -> Identifier:
     """
     Takes value extracted from the index, column or cell and returns
     an instance of Identifier (Literal, URIRef or BNode) using correct 
@@ -164,8 +164,6 @@ def _get_identifier(value: str, instance: str = None, index: str = None, datatyp
         Value of index, column or cell
     instance : str
         Name of the rdfLib Identifier class to use
-    index : str
-        Index can be ignored, but keeping here for completeness
     datatype : str
         Datatype of rdfLib Literal to use 
         (see https://rdflib.readthedocs.io/en/stable/rdf_terms.html#python-support)
