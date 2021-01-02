@@ -1,9 +1,9 @@
 # -*- coding: utf-8 -*-
 import pandas as pd
+import numpy as np
 from rdflib import Graph, Literal, URIRef, BNode
 from rdflib.term import Identifier
 from rdflib.namespace import NamespaceManager
-import logging
 import re
 
 def to_graph(df: pd.DataFrame) -> Graph:
@@ -35,7 +35,7 @@ def to_graph(df: pd.DataFrame) -> Graph:
         for (column, value) in series.iteritems():
             match = re.search('([\w?:/.]*)(\{(\w*)\})?(\[(\d*)\])?(\(([\w?:/.]*)\))?(@(\w*))?', column)
 
-            s = _get_identifier(index[0])
+            s = _get_identifier(index)
             p = _get_identifier(match.group(1))
 
             if isinstance(value, bytes):
@@ -131,7 +131,7 @@ def to_dataframe(g: Graph) -> pd.DataFrame:
                     s_index = 0
                     last_seen_subject = None
                     for s, o in sorted(g.subject_objects(p)):
-                        if last_seen_subject and s != last_seen_subject:
+                        if s != last_seen_subject:
                             s_index = 0
                         o_idl = _get_idl_for_identifier(o)
                         if o_idl == idl:
@@ -141,9 +141,9 @@ def to_dataframe(g: Graph) -> pd.DataFrame:
                                     p_objects.append(o)
                                 else:
                                     p_objects.append(_get_str_for_uri(g.namespace_manager, o))
-                                last_seen_subject = s
                             s_index = s_index + 1
-                series[series_name] = pd.Series(p_objects, p_subjects, 'string')
+                        last_seen_subject = s
+                series[series_name] = pd.Series(p_objects, p_subjects, np.unicode_)
 
     df = pd.DataFrame(series)
 
