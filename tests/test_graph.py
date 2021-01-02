@@ -119,12 +119,6 @@ class ConversionTestCase(unittest.TestCase):
                 
         g_result = rdfpandas.to_graph(df)
 
-        for (s, p, o) in g_expected:
-            print(s, p, o)
-
-        for (s, p, o) in g_result:
-            print(s, p, o)
-
         self.assertEquals(rdflib.compare.isomorphic(g_expected, g_result), True)
 
     def test_should_convert_data_frame_to_graph_literal(self):
@@ -256,8 +250,8 @@ class ConversionTestCase(unittest.TestCase):
                         rdflib.URIRef('http://github.com/cadmiumkitty/rdfpandas/integer'), 
                         rdflib.Literal(10)))
         g.add((rdflib.URIRef('http://github.com/cadmiumkitty/rdfpandas/one'),
-                        rdflib.URIRef('http://github.com/cadmiumkitty/rdfpandas/decimal'), 
-                        rdflib.Literal(10.00)))
+                        rdflib.URIRef('http://github.com/cadmiumkitty/rdfpandas/double'), 
+                        rdflib.Literal(10.0)))
 
         g.add((rdflib.URIRef('http://github.com/cadmiumkitty/rdfpandas/one'),
                 rdflib.URIRef('http://github.com/cadmiumkitty/rdfpandas/uri'), 
@@ -289,45 +283,41 @@ class ConversionTestCase(unittest.TestCase):
                         rdflib.URIRef('http://github.com/cadmiumkitty/rdfpandas/string'), 
                         rdflib.Literal('String in English 1 (2)', lang = 'en')))
 
-        ds01 = pd.Series(data=['String 1'], index = ['http://github.com/cadmiumkitty/rdfpandas/one'], dtype = np.unicode_)
-        ds02 = pd.Series(data=['String 2'], index = ['http://github.com/cadmiumkitty/rdfpandas/two'], dtype = np.unicode_)
-        ds03 = pd.Series(data=['String with type 1 (1)', 'String with type 1 (2)'], index = ['http://github.com/cadmiumkitty/rdfpandas/one', 'http://github.com/cadmiumkitty/rdfpandas/two'], dtype = np.unicode_)
-        ds04 = pd.Series(data=['String with type 2 (1)', 'String with type 2 (2)'], index = ['http://github.com/cadmiumkitty/rdfpandas/one', 'http://github.com/cadmiumkitty/rdfpandas/two'], dtype = np.unicode_)
-        ds05 = pd.Series(data=['String in Nepali 1 (1)', 'String in Nepali 1 (2)'], index = ['http://github.com/cadmiumkitty/rdfpandas/one', 'http://github.com/cadmiumkitty/rdfpandas/two'], dtype = np.unicode_)
-        ds06 = pd.Series(data=['String in Nepali 2 (2)'], index = ['http://github.com/cadmiumkitty/rdfpandas/two'], dtype = np.unicode_)
-        ds07 = pd.Series(data=['String in English 1 (1)', 'String in English 1 (2)'], index=['http://github.com/cadmiumkitty/rdfpandas/one', 'http://github.com/cadmiumkitty/rdfpandas/two'], dtype = np.unicode_)
-        ds08 = pd.Series(data=['String in English 2 (2)'], index = ['http://github.com/cadmiumkitty/rdfpandas/one'], dtype = np.unicode_)
-        ds09 = pd.Series(data=['String in Russian 1 (1)'], index = ['http://github.com/cadmiumkitty/rdfpandas/one'], dtype = np.unicode_)
-        ds10 = pd.Series(data=['10'], index = ['http://github.com/cadmiumkitty/rdfpandas/one'], dtype = np.unicode_)
-        ds11 = pd.Series(data=['10.00'], index = ['http://github.com/cadmiumkitty/rdfpandas/one'], dtype = np.unicode_)
-        ds12 = pd.Series(data=['http://github.com/cadmiumkitty/rdfpandas/uri'], index = ['http://github.com/cadmiumkitty/rdfpandas/one'], dtype = np.unicode_)
-        ds13 = pd.Series(data=['rdfpandas:curie'], index = ['http://github.com/cadmiumkitty/rdfpandas/one'], dtype = np.unicode_)
-        ds14 = pd.Series(data=['12345'], index = ['http://github.com/cadmiumkitty/rdfpandas/one'], dtype = np.unicode_)
+        ds01 = pd.Series(data = ['String 1'], index = ['http://github.com/cadmiumkitty/rdfpandas/one'], dtype = np.unicode_)
+        ds02 = pd.Series(data = ['String 2'], index = ['http://github.com/cadmiumkitty/rdfpandas/two'], dtype = np.unicode_)
+        ds03 = pd.Series(data = ['String with type 1 (1)', 'String with type 1 (2)'], index = ['http://github.com/cadmiumkitty/rdfpandas/one', 'http://github.com/cadmiumkitty/rdfpandas/two'], dtype = np.unicode_)
+        ds04 = pd.Series(data = ['String with type 2 (1)', 'String with type 2 (2)'], index = ['http://github.com/cadmiumkitty/rdfpandas/one', 'http://github.com/cadmiumkitty/rdfpandas/two'], dtype = np.unicode_)
+        ds05 = pd.Series(data = ['String in Nepali 1 (1)', 'String in Nepali 1 (2)'], index = ['http://github.com/cadmiumkitty/rdfpandas/one', 'http://github.com/cadmiumkitty/rdfpandas/two'], dtype = np.unicode_)
+        ds06 = pd.Series(data = ['String in Nepali 2 (2)'], index = ['http://github.com/cadmiumkitty/rdfpandas/two'], dtype = np.unicode_)
+        ds07 = pd.Series(data = ['String in English 1 (1)', 'String in English 1 (2)'], index = ['http://github.com/cadmiumkitty/rdfpandas/one', 'http://github.com/cadmiumkitty/rdfpandas/two'], dtype = np.unicode_)
+        ds08 = pd.Series(data = ['String in English 2 (1)'], index = ['http://github.com/cadmiumkitty/rdfpandas/one'], dtype = np.unicode_)
+        ds09 = pd.Series(data = ['String in Russian 1 (1)'], index = ['http://github.com/cadmiumkitty/rdfpandas/one'], dtype = np.unicode_)
+        ds10 = pd.Series(data = ['10'], index = ['http://github.com/cadmiumkitty/rdfpandas/one'], dtype = np.unicode_)
+        ds11 = pd.Series(data = ['10.0'], index = ['http://github.com/cadmiumkitty/rdfpandas/one'], dtype = np.unicode_)
+        ds12 = pd.Series(data = ['http://github.com/cadmiumkitty/rdfpandas/uri'], index = ['http://github.com/cadmiumkitty/rdfpandas/one'], dtype = np.unicode_)
+        ds13 = pd.Series(data = ['rdfpandas:curie'], index = ['http://github.com/cadmiumkitty/rdfpandas/one'], dtype = np.unicode_)
+        ds14 = pd.Series(data = ['12345'], index = ['http://github.com/cadmiumkitty/rdfpandas/one'], dtype = np.unicode_)
 
         df_expected = pd.DataFrame({
-            'http://github.com/cadmiumkitty/rdfpandas/bnode{BNode}': ds14,
-            'http://github.com/cadmiumkitty/rdfpandas/curie{URIRef}': ds13,
-            'http://github.com/cadmiumkitty/rdfpandas/decimal{Literal}(xsd:decimal)': ds11,
-            'http://github.com/cadmiumkitty/rdfpandas/integer{Literal}(xsd:integer)': ds10,
             'http://github.com/cadmiumkitty/rdfpandas/string{Literal}': ds01,
-            'http://github.com/cadmiumkitty/rdfpandas/string{Literal}[0]@en': ds07,
-            'http://github.com/cadmiumkitty/rdfpandas/string{Literal}[1]@en': ds08,
-            'http://github.com/cadmiumkitty/rdfpandas/string{Literal}[0]@ne': ds05,
-            'http://github.com/cadmiumkitty/rdfpandas/string{Literal}[1]@ne': ds06,
-            'http://github.com/cadmiumkitty/rdfpandas/string{Literal}@ru': ds09,
+            'http://github.com/cadmiumkitty/rdfpandas/anotherstring{Literal}': ds02,
             'http://github.com/cadmiumkitty/rdfpandas/string{Literal}[0](xsd:string)': ds03,
             'http://github.com/cadmiumkitty/rdfpandas/string{Literal}[1](xsd:string)': ds04,
+            'http://github.com/cadmiumkitty/rdfpandas/string{Literal}[0]@ne': ds05,
+            'http://github.com/cadmiumkitty/rdfpandas/string{Literal}[1]@ne': ds06,
+            'http://github.com/cadmiumkitty/rdfpandas/string{Literal}[0]@en': ds07,
+            'http://github.com/cadmiumkitty/rdfpandas/string{Literal}[1]@en': ds08,
+            'http://github.com/cadmiumkitty/rdfpandas/string{Literal}@ru': ds09,
+            'http://github.com/cadmiumkitty/rdfpandas/integer{Literal}(xsd:integer)': ds10,
+            'http://github.com/cadmiumkitty/rdfpandas/double{Literal}(xsd:double)': ds11,
             'http://github.com/cadmiumkitty/rdfpandas/uri{URIRef}': ds12,
-            'http://github.com/cadmiumkitty/rdfpandas/anotherstring{Literal}': ds02
+            'http://github.com/cadmiumkitty/rdfpandas/curie{URIRef}': ds13,
+            'http://github.com/cadmiumkitty/rdfpandas/bnode{BNode}': ds14
             })
 
         df_result = rdfpandas.to_dataframe(g)
 
-        print(df_expected.T)
-
-        print(df_result.T)
-
-        self.assertEquals(df_expected.equals(df_result), True)
+        pd.testing.assert_frame_equal(df_expected, df_result, check_like = True)
 
 
 if __name__ == '__main__':

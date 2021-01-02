@@ -124,7 +124,7 @@ def to_dataframe(g: Graph) -> pd.DataFrame:
                     for s, o in sorted(g.subject_objects(p)):
                         p_subjects.append(_get_str_for_uri(g.namespace_manager, s))
                         if isinstance(o, Literal):
-                            p_objects.append(o)
+                            p_objects.append(str(o))
                         else:
                             p_objects.append(_get_str_for_uri(g.namespace_manager, o))
                 else:
@@ -138,18 +138,18 @@ def to_dataframe(g: Graph) -> pd.DataFrame:
                             if s_index == index:
                                 p_subjects.append(_get_str_for_uri(g.namespace_manager, s))
                                 if isinstance(o, Literal):
-                                    p_objects.append(o)
+                                    p_objects.append(str(o))
                                 else:
                                     p_objects.append(_get_str_for_uri(g.namespace_manager, o))
                             s_index = s_index + 1
                         last_seen_subject = s
-                series[series_name] = pd.Series(p_objects, p_subjects, np.unicode_)
+                series[series_name] = pd.Series(data = p_objects, index = p_subjects, dtype = np.unicode_)
 
     df = pd.DataFrame(series)
 
     return pd.DataFrame(series)
 
-def _get_identifier(value: str, instance: str = None, datatype: str = None, language: str = None) -> Identifier:
+def _get_identifier(value: object, instance: str = None, datatype: str = None, language: str = None) -> Identifier:
     """
     Takes value extracted from the index, column or cell and returns
     an instance of Identifier (Literal, URIRef or BNode) using correct 
@@ -157,7 +157,7 @@ def _get_identifier(value: str, instance: str = None, datatype: str = None, lang
 
     Parameters
     ----------
-    value : str
+    value : object
         Value of index, column or cell
     instance : str
         Name of the rdfLib Identifier class to use
@@ -175,12 +175,12 @@ def _get_identifier(value: str, instance: str = None, datatype: str = None, lang
     """
 
     if not instance:
-        if re.match('^\w*:\w*$', str(value)) or re.match('^http[s]?://.*$', str(value)):
-            return URIRef(value)
-        elif language:
+        if language:
             return Literal(value, lang = language)
         elif datatype:
             return Literal(value, datatype = URIRef(datatype))
+        elif re.match('^\w*:\w*$', str(value)) or re.match('^http[s]?://.*$', str(value)):
+            return URIRef(value)
         else:
             return Literal(value)
     elif instance == Literal.__name__:
