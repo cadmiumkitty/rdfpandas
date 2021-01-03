@@ -35,15 +35,14 @@ def to_graph(df: pd.DataFrame) -> Graph:
         for (column, value) in series.iteritems():
             match = re.search('([\w?:/.]*)(\{(\w*)\})?(\[(\d*)\])?(\(([\w?:/.]*)\))?(@(\w*))?', column)
 
-            s = _get_identifier(index)
-            p = _get_identifier(match.group(1))
-
-            if isinstance(value, bytes):
-                o = _get_identifier(value.decode('utf-8'), match.group(3), match.group(7), match.group(9))
-            else:
-                o = _get_identifier(value, match.group(3), match.group(7), match.group(9))
-
-            g.add((s, p, o))
+            if pd.notna(value) and pd.notnull(value):
+                s = _get_identifier(index)
+                p = _get_identifier(match.group(1))
+                if isinstance(value, bytes):
+                    o = _get_identifier(value.decode('utf-8'), match.group(3), match.group(7), match.group(9))
+                else:
+                    o = _get_identifier(value, match.group(3), match.group(7), match.group(9))
+                g.add((s, p, o))
 
     return g
 

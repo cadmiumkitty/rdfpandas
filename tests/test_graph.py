@@ -48,8 +48,8 @@ class ConversionTestCase(unittest.TestCase):
         ds11 = pd.Series(data = [True], index = ['http://github.com/cadmiumkitty/rdfpandas/one'], dtype = np.bool_)
         ds12 = pd.Series(data = [False], index = ['http://github.com/cadmiumkitty/rdfpandas/one'], dtype = np.bool_)
 
-        ds13 = pd.Series(data = ['http://github.com/cadmiumkitty/rdfpandas/uri'], index = ['http://github.com/cadmiumkitty/rdfpandas/one'], dtype = np.unicode_)
-        ds14 = pd.Series(data = ['rdfpandas:curie'], index = ['http://github.com/cadmiumkitty/rdfpandas/one'], dtype = np.unicode_)
+        ds13 = pd.Series(data = ['https://google.com'], index = ['http://github.com/cadmiumkitty/rdfpandas/one'], dtype = np.unicode_)
+        ds14 = pd.Series(data = ['skos:broader'], index = ['http://github.com/cadmiumkitty/rdfpandas/one'], dtype = np.unicode_)
 
         df = pd.DataFrame({
             'http://github.com/cadmiumkitty/rdfpandas/stringu': ds01, 
@@ -113,12 +113,20 @@ class ConversionTestCase(unittest.TestCase):
 
         g_expected.add((URIRef('http://github.com/cadmiumkitty/rdfpandas/one'),
                 URIRef('http://github.com/cadmiumkitty/rdfpandas/uri'), 
-                URIRef('http://github.com/cadmiumkitty/rdfpandas/uri')))
+                URIRef('https://google.com')))
         g_expected.add((URIRef('http://github.com/cadmiumkitty/rdfpandas/one'),
                 URIRef('http://github.com/cadmiumkitty/rdfpandas/curie'), 
-                URIRef('rdfpandas:curie')))
+                URIRef('skos:broader')))
                 
         g_result = rdfpandas.to_graph(df)
+
+        for s, p, o in g_expected:
+            print(s, p, o)
+
+        print('===')
+
+        for s, p, o in g_result:
+            print(s, p, o)
 
         self.assertEquals(rdflib.compare.isomorphic(g_expected, g_result), True)
 
@@ -167,8 +175,8 @@ class ConversionTestCase(unittest.TestCase):
         """Should create triples based on URIRef instance type.
         """
         
-        ds1 = pd.Series(data=['http://github.com/cadmiumkitty/rdfpandas/uri'], index = ['http://github.com/cadmiumkitty/rdfpandas/one'], dtype = np.unicode_)
-        ds2 = pd.Series(data=['rdfpandas:curie'], index = ['http://github.com/cadmiumkitty/rdfpandas/one'], dtype = np.unicode_)
+        ds1 = pd.Series(data=['https://google.com'], index = ['http://github.com/cadmiumkitty/rdfpandas/one'], dtype = np.unicode_)
+        ds2 = pd.Series(data=['skos:broader'], index = ['http://github.com/cadmiumkitty/rdfpandas/one'], dtype = np.unicode_)
 
         df = pd.DataFrame({
             'http://github.com/cadmiumkitty/rdfpandas/uri{URIRef}': ds1,
@@ -179,10 +187,10 @@ class ConversionTestCase(unittest.TestCase):
         
         g_expected.add((URIRef('http://github.com/cadmiumkitty/rdfpandas/one'),
                 URIRef('http://github.com/cadmiumkitty/rdfpandas/uri'), 
-                URIRef('http://github.com/cadmiumkitty/rdfpandas/uri')))
+                URIRef('https://google.com')))
         g_expected.add((URIRef('http://github.com/cadmiumkitty/rdfpandas/one'),
                 URIRef('http://github.com/cadmiumkitty/rdfpandas/curie'), 
-                URIRef('rdfpandas:curie')))
+                URIRef('skos:broader')))
                 
         g_result = rdfpandas.to_graph(df)
         
@@ -256,10 +264,10 @@ class ConversionTestCase(unittest.TestCase):
 
         g.add((URIRef('http://github.com/cadmiumkitty/rdfpandas/one'),
                 URIRef('http://github.com/cadmiumkitty/rdfpandas/uri'), 
-                URIRef('http://github.com/cadmiumkitty/rdfpandas/uri')))
+                URIRef('https://google.com')))
         g.add((URIRef('http://github.com/cadmiumkitty/rdfpandas/one'),
                 URIRef('http://github.com/cadmiumkitty/rdfpandas/curie'), 
-                URIRef('rdfpandas:curie')))
+                URIRef('skos:broader')))
 
         g.add((URIRef('http://github.com/cadmiumkitty/rdfpandas/one'),
                 URIRef('http://github.com/cadmiumkitty/rdfpandas/bnode'), 
@@ -295,8 +303,8 @@ class ConversionTestCase(unittest.TestCase):
         ds09 = pd.Series(data = ['String in Russian 1 (1)'], index = ['http://github.com/cadmiumkitty/rdfpandas/one'], dtype = np.unicode_)
         ds10 = pd.Series(data = ['10'], index = ['http://github.com/cadmiumkitty/rdfpandas/one'], dtype = np.unicode_)
         ds11 = pd.Series(data = ['10.0'], index = ['http://github.com/cadmiumkitty/rdfpandas/one'], dtype = np.unicode_)
-        ds12 = pd.Series(data = ['http://github.com/cadmiumkitty/rdfpandas/uri'], index = ['http://github.com/cadmiumkitty/rdfpandas/one'], dtype = np.unicode_)
-        ds13 = pd.Series(data = ['rdfpandas:curie'], index = ['http://github.com/cadmiumkitty/rdfpandas/one'], dtype = np.unicode_)
+        ds12 = pd.Series(data = ['https://google.com'], index = ['http://github.com/cadmiumkitty/rdfpandas/one'], dtype = np.unicode_)
+        ds13 = pd.Series(data = ['skos:broader'], index = ['http://github.com/cadmiumkitty/rdfpandas/one'], dtype = np.unicode_)
         ds14 = pd.Series(data = ['12345'], index = ['http://github.com/cadmiumkitty/rdfpandas/one'], dtype = np.unicode_)
 
         df_expected = pd.DataFrame({
@@ -319,6 +327,29 @@ class ConversionTestCase(unittest.TestCase):
         df_result = rdfpandas.to_dataframe(g)
 
         pd.testing.assert_frame_equal(df_expected, df_result, check_like = True)
+
+
+    def test_should_roundtrip_csv_to_graph_to_csv(self):
+        """Should roundtrip DF -> Graph -> DF
+        """
+
+        df = pd.read_csv('./csv/test.csv', index_col = '@id', keep_default_na = True)
+        g = rdfpandas.to_graph(df)
+        df_result = rdfpandas.to_dataframe(g)
+
+        pd.testing.assert_frame_equal(df.astype(np.unicode_), df_result.astype(np.unicode_), check_like = True, check_names = False)
+
+
+    def test_should_roundtrip_graph_to_csv_to_graph(self):
+        """Should roundtrip Graph -> DF -> Graph
+        """
+
+        g = rdflib.Graph()
+        g.parse('./rdf/test.ttl', format = 'ttl')
+        df = rdfpandas.to_dataframe(g)
+        g_result = rdfpandas.to_graph(df)
+
+        self.assertEquals(rdflib.compare.isomorphic(g, g_result), True)
 
 
 if __name__ == '__main__':
