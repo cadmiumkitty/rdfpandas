@@ -145,8 +145,6 @@ def to_dataframe(g: Graph) -> pd.DataFrame:
                         last_seen_subject = s
                 series[series_name] = pd.Series(data = p_objects, index = p_subjects, dtype = np.unicode_)
 
-    df = pd.DataFrame(series)
-
     return pd.DataFrame(series)
 
 def _get_identifier(value: object, instance: str = None, datatype: str = None, language: str = None) -> Identifier:
