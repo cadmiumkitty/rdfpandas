@@ -31,6 +31,8 @@ Usage
 Creating RDF from DataFrame
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+As of version 1.1.0 NamespaceManager can be supplied to ``rdflib.to_graph`` for conversion to Graph.
+
 ::
 
   import rdfpandas.graph
@@ -38,8 +40,11 @@ Creating RDF from DataFrame
   import rdflib
  
   df = pd.read_csv('to_graph_test.csv', index_col = '@id', keep_default_na = False)
-  g = to_graph(df)
-  s = g.serialize(format='turtle')
+  namespace_manager = NamespaceManager(Graph())
+  namespace_manager.bind('skos', SKOS)
+  namespace_manager.bind('rdfpandas', Namespace('http://github.com/cadmiumkitty/rdfpandas/'))
+  g = to_graph(df, namespace_manager)
+  s = g.serialize(format = 'turtle')
 
 Creating DataFrame from RDF
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^

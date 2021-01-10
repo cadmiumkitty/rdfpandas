@@ -6,7 +6,7 @@ from rdflib.term import Identifier
 from rdflib.namespace import NamespaceManager
 import re
 
-def to_graph(df: pd.DataFrame) -> Graph:
+def to_graph(df: pd.DataFrame, namespace_manager: NamespaceManager = None) -> Graph:
     """
     Takes Pandas DataFrame and returns RDFLib Graph.
     Row indices are used as subjects and column indices as predicates. 
@@ -21,6 +21,8 @@ def to_graph(df: pd.DataFrame) -> Graph:
     ----------
     df : pandas.DataFrame
         DataFrame to be converted into Graph.
+    namespace_manager : rdflib.namespace.NamespaceManager
+        NamespaceManager to use to normalize URIs
 
     Returns
     -------
@@ -29,19 +31,23 @@ def to_graph(df: pd.DataFrame) -> Graph:
 
     """
     
-    g = Graph()
+    g = Graph(namespace_manager = namespace_manager)
+
+    prefixes = {}
+    for (prefix, namespace) in g.namespace_manager.namespaces():
+        prefixes[prefix] = namespace
 
     for (index, series) in df.iterrows():
         for (column, value) in series.iteritems():
             match = re.search('([\w?:/.]*)(\{(\w*)\})?(\[(\d*)\])?(\(([\w?:/.]*)\))?(@(\w*))?', column)
 
             if pd.notna(value) and pd.notnull(value):
-                s = _get_identifier(index)
-                p = _get_identifier(match.group(1))
+                s = _get_identifier(prefixes, index)
+                p = _get_identifier(prefixes, match.group(1))
                 if isinstance(value, bytes):
-                    o = _get_identifier(value.decode('utf-8'), match.group(3), match.group(7), match.group(9))
+                    o = _get_identifier(prefixes, value.decode('utf-8'), match.group(3), match.group(7), match.group(9))
                 else:
-                    o = _get_identifier(value, match.group(3), match.group(7), match.group(9))
+                    o = _get_identifier(prefixes, value, match.group(3), match.group(7), match.group(9))
                 g.add((s, p, o))
 
     return g
@@ -110,22 +116,22 @@ def to_dataframe(g: Graph) -> pd.DataFrame:
             language = idl[2]
             idl_len = predicates[p][idl]
             for index in range(idl_len):
-                series_name = f'{_get_str_for_uri(g.namespace_manager, p)}{{{instance}}}'
+                series_name = f'{_get_str_for_uriref(g.namespace_manager, p)}{{{instance}}}'
                 if idl_len > 1:
                     series_name = ''.join([series_name, f'[{index}]'])
                 if datatype:
-                    series_name = ''.join([series_name, f'({_get_str_for_uri(g.namespace_manager, datatype)})'])
+                    series_name = ''.join([series_name, f'({_get_str_for_uriref(g.namespace_manager, datatype)})'])
                 if language:
                     series_name = ''.join([series_name, f'@{language}'])
                 p_subjects = []
                 p_objects = []
                 if idls_len == 1 and idl_len == 1:
                     for s, o in sorted(g.subject_objects(p)):
-                        p_subjects.append(_get_str_for_uri(g.namespace_manager, s))
+                        p_subjects.append(_get_str_for_uriref(g.namespace_manager, s))
                         if isinstance(o, Literal):
                             p_objects.append(str(o))
                         else:
-                            p_objects.append(_get_str_for_uri(g.namespace_manager, o))
+                            p_objects.append(_get_str_for_uriref(g.namespace_manager, o))
                 else:
                     s_index = 0
                     last_seen_subject = None
@@ -135,18 +141,18 @@ def to_dataframe(g: Graph) -> pd.DataFrame:
                         o_idl = _get_idl_for_identifier(o)
                         if o_idl == idl:
                             if s_index == index:
-                                p_subjects.append(_get_str_for_uri(g.namespace_manager, s))
+                                p_subjects.append(_get_str_for_uriref(g.namespace_manager, s))
                                 if isinstance(o, Literal):
                                     p_objects.append(str(o))
                                 else:
-                                    p_objects.append(_get_str_for_uri(g.namespace_manager, o))
+                                    p_objects.append(_get_str_for_uriref(g.namespace_manager, o))
                             s_index = s_index + 1
                         last_seen_subject = s
                 series[series_name] = pd.Series(data = p_objects, index = p_subjects, dtype = np.unicode_)
 
     return pd.DataFrame(series)
 
-def _get_identifier(value: object, instance: str = None, datatype: str = None, language: str = None) -> Identifier:
+def _get_identifier(prefixes: dict, value: object, instance: str = None, datatype: str = None, language: str = None) -> Identifier:
     """
     Takes value extracted from the index, column or cell and returns
     an instance of Identifier (Literal, URIRef or BNode) using correct 
@@ -154,6 +160,8 @@ def _get_identifier(value: object, instance: str = None, datatype: str = None, l
 
     Parameters
     ----------
+    prefixes : dict
+        Prefixes to use to normalize URIs
     value : object
         Value of index, column or cell
     instance : str
@@ -176,19 +184,32 @@ def _get_identifier(value: object, instance: str = None, datatype: str = None, l
             return Literal(value, lang = language)
         elif datatype:
             return Literal(value, datatype = URIRef(datatype))
-        elif re.match('^\w*:\w*$', str(value)) or re.match('^http[s]?://.*$', str(value)):
+        elif _is_uri(value):
             return URIRef(value)
+        elif _is_curie(value):
+            return _get_uriref_for_curie(prefixes, value)
         else:
             return Literal(value)
     elif instance == Literal.__name__:
         if language:
             return Literal(value, lang = language)
         elif datatype:
-            return Literal(value, datatype = URIRef(datatype))
+            if _is_uri(datatype):
+                datatype_uriref = URIRef(datatype)
+            elif _is_curie(datatype):
+                datatype_uriref = _get_uriref_for_curie(prefixes, datatype)
+            else:
+                ValueError(f'Not a valid URI for datatype {datatype}')  
+            return Literal(value, datatype = datatype_uriref)
         else:
             return Literal(value)
     elif instance == URIRef.__name__:
-        return URIRef(value)
+        if _is_uri(value):
+            return URIRef(value)
+        elif _is_curie(value):
+            return _get_uriref_for_curie(prefixes, value)
+        else:
+            ValueError(f'Not a valid URI {value}')  
     elif instance == BNode.__name__:
         return BNode(value)
 
@@ -220,7 +241,7 @@ def _get_idl_for_identifier(i: Identifier) -> tuple:
 
     return (instance, datatype, language)
 
-def _get_str_for_uri(namespace_manager: NamespaceManager, uri: URIRef) -> str:
+def _get_str_for_uriref(namespace_manager: NamespaceManager, uriref: URIRef) -> str:
     """
     Reusing NamespaceManager.normalizeUri for transforming Graph to DataFrame.
     In effect we only need to strip < and > from N3 representation and
@@ -230,8 +251,8 @@ def _get_str_for_uri(namespace_manager: NamespaceManager, uri: URIRef) -> str:
     ----------
     namespace_manager : rdflib.namespace.NamespaceManager
         NamespaceManager to use to normalize URIs
-    uri : rdflib.URIRef
-        NamespaceManager to use to normalize URIs
+    uriref : rdflib.URIRef
+        URI to normalize
 
     Returns
     -------
@@ -240,4 +261,65 @@ def _get_str_for_uri(namespace_manager: NamespaceManager, uri: URIRef) -> str:
 
     """
 
-    return re.sub('<|>', '', namespace_manager.normalizeUri(uri))
+    return re.sub('<|>', '', namespace_manager.normalizeUri(uriref))
+
+def _get_uriref_for_curie(prefixes: dict, value: object) -> URIRef:
+    """
+    Converts curie string into URIRef with fully qualified URI.
+
+    Parameters
+    ----------
+    prefixes : dict
+        Prefixes to use to normalize URIs
+    value : object
+        Value from DataFrame to be converted to URIRef.
+
+    Returns
+    -------
+    rdflib.URIRef
+        URIRef created from the string.
+
+    """
+
+    prefix, name = value.split(':')
+    if prefix in prefixes:
+        return URIRef(''.join((prefixes[prefix], name)))
+    else:
+        return URIRef(value)
+
+def _is_curie(value: object) -> bool:
+    """
+    Checks if value from DataFrame is a CURIE.
+
+    Parameters
+    ----------
+    value : object
+        Value from DataFrame to be checked.
+
+    Returns
+    -------
+    bool
+        True if value is matching CURIE pattern, false otherwise.
+
+    """
+
+    return re.match('^\w*:\w*$', str(value))
+
+def _is_uri(value: object) -> bool:
+    """
+    Checks if value from DataFrame is a URI.
+
+    Parameters
+    ----------
+    value : object
+        Value from DataFrame to be checked.
+
+    Returns
+    -------
+    bool
+        True if value is matching URI pattern, false otherwise.
+
+    """
+
+    return re.match('^http[s]?://.*$', str(value))
+
