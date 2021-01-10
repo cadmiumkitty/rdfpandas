@@ -1,23 +1,24 @@
 @prefix rdfpandas: <http://github.com/cadmiumkitty/rdfpandas/> .
 @prefix skos: <http://www.w3.org/2004/02/skos/core#> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
 
-<rdfpandas:one> <rdfpandas:curie> <skos:broader> ;
-    <rdfpandas:double> "10.0"^^<xsd:double> ;
-    <rdfpandas:integer> "10"^^<xsd:integer> ;
-    <rdfpandas:string> "String 1",
+rdfpandas:one rdfpandas:curie skos:broader ;
+    rdfpandas:double "10.0"^^xsd:double ;
+    rdfpandas:integer "10"^^xsd:integer ;
+    rdfpandas:string "String 1",
         "String in English 1 (1)"@en,
         "String in English 2 (1)"@en,
         "String in Nepali 1 (1)"@ne,
         "String in Russian 1 (1)"@ru,
-        "String with type 1 (1)"^^<xsd:string>,
-        "String with type 2 (1)"^^<xsd:string> ;
-    <rdfpandas:uri> <https://google.com> .
+        "String with type 1 (1)"^^xsd:string,
+        "String with type 2 (1)"^^xsd:string ;
+    rdfpandas:uri <https://google.com> .
 
-<rdfpandas:two> <rdfpandas:anotherstring> "String 2" ;
-    <rdfpandas:double> "20.0"^^<xsd:double> ;
-    <rdfpandas:integer> "20"^^<xsd:integer> ;
-    <rdfpandas:string> "String in English 1 (2)"@en,
+rdfpandas:two rdfpandas:anotherstring "String 2" ;
+    rdfpandas:double "20.0"^^xsd:double ;
+    rdfpandas:integer "20"^^xsd:integer ;
+    rdfpandas:string "String in English 1 (2)"@en,
         "String in Nepali 1 (2)"@ne,
         "String in Nepali 2 (2)"@ne,
-        "String with type 1 (2)"^^<xsd:string>,
-        "String with type 2 (2)"^^<xsd:string> .
+        "String with type 1 (2)"^^xsd:string,
+        "String with type 2 (2)"^^xsd:string .

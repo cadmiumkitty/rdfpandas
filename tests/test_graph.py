@@ -5,9 +5,9 @@ from .context import rdfpandas
 import pandas as pd
 import numpy as np
 
-from rdflib import Graph, Literal, URIRef, BNode
+from rdflib import Graph, Literal, URIRef, BNode, Namespace
 from rdflib.term import Identifier
-from rdflib.namespace import NamespaceManager
+from rdflib.namespace import NamespaceManager, SKOS, XSD
 import rdflib.compare
 
 import unittest
@@ -156,7 +156,7 @@ class ConversionTestCase(unittest.TestCase):
                         Literal('String')))
         g_expected.add((URIRef('http://github.com/cadmiumkitty/rdfpandas/one'),
                         URIRef('http://github.com/cadmiumkitty/rdfpandas/string'),
-                        Literal('String with type only', datatype = URIRef('xsd:string'))))
+                        Literal('String with type only', datatype = XSD.string)))
         g_expected.add((URIRef('http://github.com/cadmiumkitty/rdfpandas/one'),
                         URIRef('http://github.com/cadmiumkitty/rdfpandas/string'),
                         Literal('String with language only in Nepali', lang = 'ne')))
@@ -334,7 +334,10 @@ class ConversionTestCase(unittest.TestCase):
         """
 
         df = pd.read_csv('./csv/test.csv', index_col = '@id', keep_default_na = True)
-        g = rdfpandas.to_graph(df)
+        namespace_manager = NamespaceManager(Graph())
+        namespace_manager.bind('skos', SKOS)
+        namespace_manager.bind('rdfpandas', Namespace('http://github.com/cadmiumkitty/rdfpandas/'))
+        g = rdfpandas.to_graph(df, namespace_manager)
         df_result = rdfpandas.to_dataframe(g)
 
         pd.testing.assert_frame_equal(df.astype(np.unicode_), df_result.astype(np.unicode_), check_like = True, check_names = False)
@@ -347,8 +350,8 @@ class ConversionTestCase(unittest.TestCase):
         g = rdflib.Graph()
         g.parse('./rdf/test.ttl', format = 'ttl')
         df = rdfpandas.to_dataframe(g)
-        g_result = rdfpandas.to_graph(df)
-
+        print(df.T)
+        g_result = rdfpandas.to_graph(df, g.namespace_manager)
         self.assertEquals(rdflib.compare.isomorphic(g, g_result), True)
 
 
