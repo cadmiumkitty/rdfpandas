@@ -177,10 +177,12 @@ class ConversionTestCase(unittest.TestCase):
         
         ds1 = pd.Series(data=['https://google.com'], index = ['http://github.com/cadmiumkitty/rdfpandas/one'], dtype = np.unicode_)
         ds2 = pd.Series(data=['skos:broader'], index = ['http://github.com/cadmiumkitty/rdfpandas/one'], dtype = np.unicode_)
+        ds3 = pd.Series(data=['skos:Concept'], index = ['http://github.com/cadmiumkitty/rdfpandas/one'], dtype = np.unicode_)
 
         df = pd.DataFrame({
             'http://github.com/cadmiumkitty/rdfpandas/uri{URIRef}': ds1,
-            'http://github.com/cadmiumkitty/rdfpandas/curie{URIRef}': ds2
+            'http://github.com/cadmiumkitty/rdfpandas/curie{URIRef}': ds2,
+            'http://www.w3.org/1999/02/22-rdf-syntax-ns#type{URIRef}': ds3
             })
         
         g_expected = Graph()
@@ -191,6 +193,9 @@ class ConversionTestCase(unittest.TestCase):
         g_expected.add((URIRef('http://github.com/cadmiumkitty/rdfpandas/one'),
                 URIRef('http://github.com/cadmiumkitty/rdfpandas/curie'), 
                 URIRef('skos:broader')))
+        g_expected.add((URIRef('http://github.com/cadmiumkitty/rdfpandas/one'),
+                URIRef('http://www.w3.org/1999/02/22-rdf-syntax-ns#type'), 
+                URIRef('skos:Concept')))
                 
         g_result = rdfpandas.to_graph(df)
         
@@ -333,7 +338,7 @@ class ConversionTestCase(unittest.TestCase):
         """Should roundtrip DF -> Graph -> DF
         """
 
-        df = pd.read_csv('./csv/test.csv', index_col = '@id', keep_default_na = True)
+        df = pd.read_csv('./tests/csv/test.csv', index_col = '@id', keep_default_na = True)
         namespace_manager = NamespaceManager(Graph())
         namespace_manager.bind('skos', SKOS)
         namespace_manager.bind('rdfpandas', Namespace('http://github.com/cadmiumkitty/rdfpandas/'))
@@ -348,7 +353,7 @@ class ConversionTestCase(unittest.TestCase):
         """
 
         g = rdflib.Graph()
-        g.parse('./rdf/test.ttl', format = 'ttl')
+        g.parse('./tests/rdf/test.ttl', format = 'ttl')
         df = rdfpandas.to_dataframe(g)
         print(df.T)
         g_result = rdfpandas.to_graph(df, g.namespace_manager)
