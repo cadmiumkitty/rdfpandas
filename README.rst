@@ -35,7 +35,7 @@ As of version 1.1.0 NamespaceManager can be supplied to ``rdflib.to_graph`` for 
 
 ::
 
-  import rdfpandas.graph
+  from rdfpandas.graph import to_graph
   import pandas as pd
   import rdflib
  
@@ -51,7 +51,7 @@ Creating DataFrame from RDF
 
 ::
 
-  import rdfpandas.graph
+  from rdfpandas.graph import to_dataframe
   import pandas as pd
   import rdflib
  
