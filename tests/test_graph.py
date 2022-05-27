@@ -176,7 +176,7 @@ class ConversionTestCase(unittest.TestCase):
             'http://github.com/cadmiumkitty/rdfpandas/uri{URIRef}': ds1,
             'http://github.com/cadmiumkitty/rdfpandas/curie{URIRef}': ds2,
             'http://www.w3.org/1999/02/22-rdf-syntax-ns#type{URIRef}': ds3,
-            'http://github.com/cadmiumkitty/rdfpandas/anothercurie{URIRef}': ds4,
+            'http://github.com/cadmiumkitty/rdfpandas/anothercurie{URIRef}': ds4
             })
         
         g_expected = Graph()
