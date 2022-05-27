@@ -11,7 +11,7 @@ with open('LICENSE') as f:
 
 setup(
     name = 'rdfpandas',
-    version = '1.1.2',
+    version = '1.1.3',
     description = 'RDF support for Pandas',
     long_description = readme,
     author = 'Eugene Morozov',
