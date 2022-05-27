@@ -116,17 +116,9 @@ class ConversionTestCase(unittest.TestCase):
                 URIRef('https://google.com')))
         g_expected.add((URIRef('http://github.com/cadmiumkitty/rdfpandas/one'),
                 URIRef('http://github.com/cadmiumkitty/rdfpandas/curie'), 
-                URIRef('skos:broader')))
+                URIRef('http://www.w3.org/2004/02/skos/core#broader')))
                 
         g_result = rdfpandas.to_graph(df)
-
-        for s, p, o in g_expected:
-            print(s, p, o)
-
-        print('===')
-
-        for s, p, o in g_result:
-            print(s, p, o)
 
         self.assertEquals(rdflib.compare.isomorphic(g_expected, g_result), True)
 
@@ -178,11 +170,13 @@ class ConversionTestCase(unittest.TestCase):
         ds1 = pd.Series(data=['https://google.com'], index = ['http://github.com/cadmiumkitty/rdfpandas/one'], dtype = np.unicode_)
         ds2 = pd.Series(data=['skos:broader'], index = ['http://github.com/cadmiumkitty/rdfpandas/one'], dtype = np.unicode_)
         ds3 = pd.Series(data=['skos:Concept'], index = ['http://github.com/cadmiumkitty/rdfpandas/one'], dtype = np.unicode_)
+        ds4 = pd.Series(data=['unknown:unknown'], index = ['http://github.com/cadmiumkitty/rdfpandas/one'], dtype = np.unicode_)
 
         df = pd.DataFrame({
             'http://github.com/cadmiumkitty/rdfpandas/uri{URIRef}': ds1,
             'http://github.com/cadmiumkitty/rdfpandas/curie{URIRef}': ds2,
-            'http://www.w3.org/1999/02/22-rdf-syntax-ns#type{URIRef}': ds3
+            'http://www.w3.org/1999/02/22-rdf-syntax-ns#type{URIRef}': ds3,
+            'http://github.com/cadmiumkitty/rdfpandas/anothercurie{URIRef}': ds4,
             })
         
         g_expected = Graph()
@@ -192,10 +186,13 @@ class ConversionTestCase(unittest.TestCase):
                 URIRef('https://google.com')))
         g_expected.add((URIRef('http://github.com/cadmiumkitty/rdfpandas/one'),
                 URIRef('http://github.com/cadmiumkitty/rdfpandas/curie'), 
-                URIRef('skos:broader')))
+                URIRef('http://www.w3.org/2004/02/skos/core#broader')))
         g_expected.add((URIRef('http://github.com/cadmiumkitty/rdfpandas/one'),
                 URIRef('http://www.w3.org/1999/02/22-rdf-syntax-ns#type'), 
-                URIRef('skos:Concept')))
+                URIRef('http://www.w3.org/2004/02/skos/core#Concept')))
+        g_expected.add((URIRef('http://github.com/cadmiumkitty/rdfpandas/one'),
+                URIRef('http://github.com/cadmiumkitty/rdfpandas/anothercurie'), 
+                URIRef('unknown:unknown')))
                 
         g_result = rdfpandas.to_graph(df)
         
@@ -355,7 +352,6 @@ class ConversionTestCase(unittest.TestCase):
         g = rdflib.Graph()
         g.parse('./tests/rdf/test.ttl', format = 'ttl')
         df = rdfpandas.to_dataframe(g)
-        print(df.T)
         g_result = rdfpandas.to_graph(df, g.namespace_manager)
         self.assertEquals(rdflib.compare.isomorphic(g, g_result), True)
 
