@@ -38,7 +38,7 @@ def to_graph(df: pd.DataFrame, namespace_manager: NamespaceManager = None) -> Gr
         prefixes[prefix] = namespace
 
     for (index, series) in df.iterrows():
-        for (column, value) in series.iteritems():
+        for (column, value) in series.items():
             # Matching unreserved, gen-delims and sub-delims with exception of "(", ")", "@", "[" and "]" from RFC 3986
             match = re.search('([\w\-._~:/?#!$&\'*+,;=]*)(\{(\w*)\})?(\[(\d*)\])?(\(([\w?:/.]*)\))?(@(\w*))?', column)
             if pd.notna(value) and pd.notnull(value):
