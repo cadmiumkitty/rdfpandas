@@ -303,7 +303,7 @@ def _is_curie(value: object) -> bool:
 
     """
 
-    return re.match('^\w*:\w*$', str(value))
+    return re.match('^[_A-Za-z][-._A-Za-z0-9]*:.+$', str(value))
 
 def _is_uri(value: object) -> bool:
     """
@@ -321,5 +321,5 @@ def _is_uri(value: object) -> bool:
 
     """
 
-    return re.match('^http[s]?://.*$', str(value))
+    return re.match('^http[s]?://.+$', str(value))
 

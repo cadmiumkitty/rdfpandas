@@ -198,6 +198,31 @@ class ConversionTestCase(unittest.TestCase):
         
         self.assertEquals(rdflib.compare.isomorphic(g_expected, g_result), True)
 
+    def test_should_convert_data_frame_to_graph_uriref_curie(self):
+        """Should create triples based on several compliant CURIES.
+        """
+        
+        ds1 = pd.Series(data=['prefix:suffix'], index = ['http://github.com/cadmiumkitty/rdfpandas/one'], dtype = np.unicode_)
+        ds2 = pd.Series(data=['preffix-._1.:suffix-._1'], index = ['http://github.com/cadmiumkitty/rdfpandas/one'], dtype = np.unicode_)
+
+        df = pd.DataFrame({
+            'http://github.com/cadmiumkitty/rdfpandas/curie1{URIRef}': ds1,
+            'http://github.com/cadmiumkitty/rdfpandas/curie2{URIRef}': ds2,
+            })
+        
+        g_expected = Graph()
+        
+        g_expected.add((URIRef('http://github.com/cadmiumkitty/rdfpandas/one'),
+                URIRef('http://github.com/cadmiumkitty/rdfpandas/curie1'), 
+                URIRef('prefix:suffix')))
+        g_expected.add((URIRef('http://github.com/cadmiumkitty/rdfpandas/one'),
+                URIRef('http://github.com/cadmiumkitty/rdfpandas/curie2'), 
+                URIRef('preffix-._1.:suffix-._1')))
+                
+        g_result = rdfpandas.to_graph(df)
+        
+        self.assertEquals(rdflib.compare.isomorphic(g_expected, g_result), True)
+
     def test_should_convert_data_frame_to_graph_bnode(self):
         """Should create triples based on BNode instance type.
         """
