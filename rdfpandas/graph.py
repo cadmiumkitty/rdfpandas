@@ -148,7 +148,7 @@ def to_dataframe(g: Graph) -> pd.DataFrame:
                                     p_objects.append(_get_str_for_uriref(g.namespace_manager, o))
                             s_index = s_index + 1
                         last_seen_subject = s
-                series[series_name] = pd.Series(data = p_objects, index = p_subjects, dtype = np.unicode_)
+                series[series_name] = pd.Series(data = p_objects, index = p_subjects, dtype = np.str_)
 
     return pd.DataFrame(series)
 

@@ -1,5 +1,5 @@
-nose
+pynose
 sphinx
 sphinx_rtd_theme
-pandas>=2.0.0
+pandas>=2.2.2
 rdflib>=6.3.2

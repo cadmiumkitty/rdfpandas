@@ -24,7 +24,7 @@ class ConversionTestCase(unittest.TestCase):
         g_expected = Graph()
         g_result = rdfpandas.to_graph(df)
 
-        self.assertEquals(rdflib.compare.isomorphic(g_expected, g_result), True)
+        self.assertEqual(rdflib.compare.isomorphic(g_expected, g_result), True)
     
     def test_should_convert_data_frame_to_graph_no_instance(self):
         """Should apply default types.
@@ -32,7 +32,7 @@ class ConversionTestCase(unittest.TestCase):
         
         ds01 = pd.Series(data = ['Bytes'], index = ['http://github.com/cadmiumkitty/rdfpandas/one'], dtype = np.str_)
 
-        ds02 = pd.Series(data = ['String'], index = ['http://github.com/cadmiumkitty/rdfpandas/one'], dtype = np.unicode_)
+        ds02 = pd.Series(data = ['String'], index = ['http://github.com/cadmiumkitty/rdfpandas/one'], dtype = np.str_)
 
         ds03 = pd.Series(data = [0], index = ['http://github.com/cadmiumkitty/rdfpandas/one'], dtype = np.int64)
         ds04 = pd.Series(data = [-9223372036854775808], index = ['http://github.com/cadmiumkitty/rdfpandas/one'], dtype = np.int64)
@@ -48,8 +48,8 @@ class ConversionTestCase(unittest.TestCase):
         ds11 = pd.Series(data = [True], index = ['http://github.com/cadmiumkitty/rdfpandas/one'], dtype = np.bool_)
         ds12 = pd.Series(data = [False], index = ['http://github.com/cadmiumkitty/rdfpandas/one'], dtype = np.bool_)
 
-        ds13 = pd.Series(data = ['https://google.com'], index = ['http://github.com/cadmiumkitty/rdfpandas/one'], dtype = np.unicode_)
-        ds14 = pd.Series(data = ['skos:broader'], index = ['http://github.com/cadmiumkitty/rdfpandas/one'], dtype = np.unicode_)
+        ds13 = pd.Series(data = ['https://google.com'], index = ['http://github.com/cadmiumkitty/rdfpandas/one'], dtype = np.str_)
+        ds14 = pd.Series(data = ['skos:broader'], index = ['http://github.com/cadmiumkitty/rdfpandas/one'], dtype = np.str_)
 
         df = pd.DataFrame({
             'http://github.com/cadmiumkitty/rdfpandas/stringu': ds01, 
@@ -120,18 +120,18 @@ class ConversionTestCase(unittest.TestCase):
                 
         g_result = rdfpandas.to_graph(df)
 
-        self.assertEquals(rdflib.compare.isomorphic(g_expected, g_result), True)
+        self.assertEqual(rdflib.compare.isomorphic(g_expected, g_result), True)
 
     def test_should_convert_data_frame_to_graph_literal(self):
         """Should create triples based on Literal instance type, datatype and 
         language provided.
         """
         
-        ds01 = pd.Series(data = ['String'], index = ['http://github.com/cadmiumkitty/rdfpandas/one'], dtype = np.unicode_)
-        ds02 = pd.Series(data = ['String with type only'], index = ['http://github.com/cadmiumkitty/rdfpandas/one'], dtype = np.unicode_)
-        ds03 = pd.Series(data = ['String with language only in Nepali'], index = ['http://github.com/cadmiumkitty/rdfpandas/one'], dtype = np.unicode_)
-        ds04 = pd.Series(data = ['String In English 1'], index = ['http://github.com/cadmiumkitty/rdfpandas/one'], dtype = np.unicode_)
-        ds05 = pd.Series(data = ['String In English 2'], index = ['http://github.com/cadmiumkitty/rdfpandas/one'], dtype = np.unicode_)
+        ds01 = pd.Series(data = ['String'], index = ['http://github.com/cadmiumkitty/rdfpandas/one'], dtype = np.str_)
+        ds02 = pd.Series(data = ['String with type only'], index = ['http://github.com/cadmiumkitty/rdfpandas/one'], dtype = np.str_)
+        ds03 = pd.Series(data = ['String with language only in Nepali'], index = ['http://github.com/cadmiumkitty/rdfpandas/one'], dtype = np.str_)
+        ds04 = pd.Series(data = ['String In English 1'], index = ['http://github.com/cadmiumkitty/rdfpandas/one'], dtype = np.str_)
+        ds05 = pd.Series(data = ['String In English 2'], index = ['http://github.com/cadmiumkitty/rdfpandas/one'], dtype = np.str_)
 
         df = pd.DataFrame({
             'http://github.com/cadmiumkitty/rdfpandas/string{Literal}': ds01,
@@ -161,16 +161,16 @@ class ConversionTestCase(unittest.TestCase):
                 
         g_result = rdfpandas.to_graph(df)
         
-        self.assertEquals(rdflib.compare.isomorphic(g_expected, g_result), True)
+        self.assertEqual(rdflib.compare.isomorphic(g_expected, g_result), True)
 
     def test_should_convert_data_frame_to_graph_uriref(self):
         """Should create triples based on URIRef instance type.
         """
         
-        ds1 = pd.Series(data=['https://google.com'], index = ['http://github.com/cadmiumkitty/rdfpandas/one'], dtype = np.unicode_)
-        ds2 = pd.Series(data=['skos:broader'], index = ['http://github.com/cadmiumkitty/rdfpandas/one'], dtype = np.unicode_)
-        ds3 = pd.Series(data=['skos:Concept'], index = ['http://github.com/cadmiumkitty/rdfpandas/one'], dtype = np.unicode_)
-        ds4 = pd.Series(data=['unknown:unknown'], index = ['http://github.com/cadmiumkitty/rdfpandas/one'], dtype = np.unicode_)
+        ds1 = pd.Series(data=['https://google.com'], index = ['http://github.com/cadmiumkitty/rdfpandas/one'], dtype = np.str_)
+        ds2 = pd.Series(data=['skos:broader'], index = ['http://github.com/cadmiumkitty/rdfpandas/one'], dtype = np.str_)
+        ds3 = pd.Series(data=['skos:Concept'], index = ['http://github.com/cadmiumkitty/rdfpandas/one'], dtype = np.str_)
+        ds4 = pd.Series(data=['unknown:unknown'], index = ['http://github.com/cadmiumkitty/rdfpandas/one'], dtype = np.str_)
 
         df = pd.DataFrame({
             'http://github.com/cadmiumkitty/rdfpandas/uri{URIRef}': ds1,
@@ -196,14 +196,14 @@ class ConversionTestCase(unittest.TestCase):
                 
         g_result = rdfpandas.to_graph(df)
         
-        self.assertEquals(rdflib.compare.isomorphic(g_expected, g_result), True)
+        self.assertEqual(rdflib.compare.isomorphic(g_expected, g_result), True)
 
     def test_should_convert_data_frame_to_graph_uriref_curie(self):
         """Should create triples based on several compliant CURIES.
         """
         
-        ds1 = pd.Series(data=['prefix:suffix'], index = ['http://github.com/cadmiumkitty/rdfpandas/one'], dtype = np.unicode_)
-        ds2 = pd.Series(data=['preffix-._1.:suffix-._1'], index = ['http://github.com/cadmiumkitty/rdfpandas/one'], dtype = np.unicode_)
+        ds1 = pd.Series(data=['prefix:suffix'], index = ['http://github.com/cadmiumkitty/rdfpandas/one'], dtype = np.str_)
+        ds2 = pd.Series(data=['preffix-._1.:suffix-._1'], index = ['http://github.com/cadmiumkitty/rdfpandas/one'], dtype = np.str_)
 
         df = pd.DataFrame({
             'http://github.com/cadmiumkitty/rdfpandas/curie1{URIRef}': ds1,
@@ -221,13 +221,13 @@ class ConversionTestCase(unittest.TestCase):
                 
         g_result = rdfpandas.to_graph(df)
         
-        self.assertEquals(rdflib.compare.isomorphic(g_expected, g_result), True)
+        self.assertEqual(rdflib.compare.isomorphic(g_expected, g_result), True)
 
     def test_should_convert_data_frame_to_graph_bnode(self):
         """Should create triples based on BNode instance type.
         """
         
-        ds1 = pd.Series(data=['ub1bL39C14'], index = ['http://github.com/cadmiumkitty/rdfpandas/one'], dtype = np.unicode_)
+        ds1 = pd.Series(data=['ub1bL39C14'], index = ['http://github.com/cadmiumkitty/rdfpandas/one'], dtype = np.str_)
 
         df = pd.DataFrame({
             'http://github.com/cadmiumkitty/rdfpandas/bnode{BNode}': ds1,
@@ -241,7 +241,7 @@ class ConversionTestCase(unittest.TestCase):
                 
         g_result = rdfpandas.to_graph(df)
         
-        self.assertEquals(rdflib.compare.isomorphic(g_expected, g_result), True)        
+        self.assertEqual(rdflib.compare.isomorphic(g_expected, g_result), True)        
 
 
     def test_should_convert_empty_graph_to_empty_data_frame(self):
@@ -251,7 +251,7 @@ class ConversionTestCase(unittest.TestCase):
         g = Graph()
         df_result = rdfpandas.to_dataframe(g)
 
-        self.assertEquals(df_result.empty, True)
+        self.assertEqual(df_result.empty, True)
 
 
     def test_should_convert_graph_to_data_frame(self):
@@ -319,20 +319,20 @@ class ConversionTestCase(unittest.TestCase):
                         URIRef('http://github.com/cadmiumkitty/rdfpandas/string'), 
                         Literal('String in English 1 (2)', lang = 'en')))
 
-        ds01 = pd.Series(data = ['String 1'], index = ['http://github.com/cadmiumkitty/rdfpandas/one'], dtype = np.unicode_)
-        ds02 = pd.Series(data = ['String 2'], index = ['http://github.com/cadmiumkitty/rdfpandas/two'], dtype = np.unicode_)
-        ds03 = pd.Series(data = ['String with type 1 (1)', 'String with type 1 (2)'], index = ['http://github.com/cadmiumkitty/rdfpandas/one', 'http://github.com/cadmiumkitty/rdfpandas/two'], dtype = np.unicode_)
-        ds04 = pd.Series(data = ['String with type 2 (1)', 'String with type 2 (2)'], index = ['http://github.com/cadmiumkitty/rdfpandas/one', 'http://github.com/cadmiumkitty/rdfpandas/two'], dtype = np.unicode_)
-        ds05 = pd.Series(data = ['String in Nepali 1 (1)', 'String in Nepali 1 (2)'], index = ['http://github.com/cadmiumkitty/rdfpandas/one', 'http://github.com/cadmiumkitty/rdfpandas/two'], dtype = np.unicode_)
-        ds06 = pd.Series(data = ['String in Nepali 2 (2)'], index = ['http://github.com/cadmiumkitty/rdfpandas/two'], dtype = np.unicode_)
-        ds07 = pd.Series(data = ['String in English 1 (1)', 'String in English 1 (2)'], index = ['http://github.com/cadmiumkitty/rdfpandas/one', 'http://github.com/cadmiumkitty/rdfpandas/two'], dtype = np.unicode_)
-        ds08 = pd.Series(data = ['String in English 2 (1)'], index = ['http://github.com/cadmiumkitty/rdfpandas/one'], dtype = np.unicode_)
-        ds09 = pd.Series(data = ['String in Russian 1 (1)'], index = ['http://github.com/cadmiumkitty/rdfpandas/one'], dtype = np.unicode_)
-        ds10 = pd.Series(data = ['10'], index = ['http://github.com/cadmiumkitty/rdfpandas/one'], dtype = np.unicode_)
-        ds11 = pd.Series(data = ['10.0'], index = ['http://github.com/cadmiumkitty/rdfpandas/one'], dtype = np.unicode_)
-        ds12 = pd.Series(data = ['https://google.com'], index = ['http://github.com/cadmiumkitty/rdfpandas/one'], dtype = np.unicode_)
-        ds13 = pd.Series(data = ['skos:broader'], index = ['http://github.com/cadmiumkitty/rdfpandas/one'], dtype = np.unicode_)
-        ds14 = pd.Series(data = ['12345'], index = ['http://github.com/cadmiumkitty/rdfpandas/one'], dtype = np.unicode_)
+        ds01 = pd.Series(data = ['String 1'], index = ['http://github.com/cadmiumkitty/rdfpandas/one'], dtype = np.str_)
+        ds02 = pd.Series(data = ['String 2'], index = ['http://github.com/cadmiumkitty/rdfpandas/two'], dtype = np.str_)
+        ds03 = pd.Series(data = ['String with type 1 (1)', 'String with type 1 (2)'], index = ['http://github.com/cadmiumkitty/rdfpandas/one', 'http://github.com/cadmiumkitty/rdfpandas/two'], dtype = np.str_)
+        ds04 = pd.Series(data = ['String with type 2 (1)', 'String with type 2 (2)'], index = ['http://github.com/cadmiumkitty/rdfpandas/one', 'http://github.com/cadmiumkitty/rdfpandas/two'], dtype = np.str_)
+        ds05 = pd.Series(data = ['String in Nepali 1 (1)', 'String in Nepali 1 (2)'], index = ['http://github.com/cadmiumkitty/rdfpandas/one', 'http://github.com/cadmiumkitty/rdfpandas/two'], dtype = np.str_)
+        ds06 = pd.Series(data = ['String in Nepali 2 (2)'], index = ['http://github.com/cadmiumkitty/rdfpandas/two'], dtype = np.str_)
+        ds07 = pd.Series(data = ['String in English 1 (1)', 'String in English 1 (2)'], index = ['http://github.com/cadmiumkitty/rdfpandas/one', 'http://github.com/cadmiumkitty/rdfpandas/two'], dtype = np.str_)
+        ds08 = pd.Series(data = ['String in English 2 (1)'], index = ['http://github.com/cadmiumkitty/rdfpandas/one'], dtype = np.str_)
+        ds09 = pd.Series(data = ['String in Russian 1 (1)'], index = ['http://github.com/cadmiumkitty/rdfpandas/one'], dtype = np.str_)
+        ds10 = pd.Series(data = ['10'], index = ['http://github.com/cadmiumkitty/rdfpandas/one'], dtype = np.str_)
+        ds11 = pd.Series(data = ['10.0'], index = ['http://github.com/cadmiumkitty/rdfpandas/one'], dtype = np.str_)
+        ds12 = pd.Series(data = ['https://google.com'], index = ['http://github.com/cadmiumkitty/rdfpandas/one'], dtype = np.str_)
+        ds13 = pd.Series(data = ['skos:broader'], index = ['http://github.com/cadmiumkitty/rdfpandas/one'], dtype = np.str_)
+        ds14 = pd.Series(data = ['12345'], index = ['http://github.com/cadmiumkitty/rdfpandas/one'], dtype = np.str_)
 
         df_expected = pd.DataFrame({
             'http://github.com/cadmiumkitty/rdfpandas/string{Literal}': ds01,
@@ -367,7 +367,7 @@ class ConversionTestCase(unittest.TestCase):
         g = rdfpandas.to_graph(df, namespace_manager)
         df_result = rdfpandas.to_dataframe(g)
 
-        pd.testing.assert_frame_equal(df.astype(np.unicode_), df_result.astype(np.unicode_), check_like = True, check_names = False)
+        pd.testing.assert_frame_equal(df.astype(np.str_), df_result.astype(np.str_), check_like = True, check_names = False)
 
 
     def test_should_roundtrip_graph_to_csv_to_graph(self):
@@ -378,7 +378,7 @@ class ConversionTestCase(unittest.TestCase):
         g.parse('./tests/rdf/test.ttl', format = 'ttl')
         df = rdfpandas.to_dataframe(g)
         g_result = rdfpandas.to_graph(df, g.namespace_manager)
-        self.assertEquals(rdflib.compare.isomorphic(g, g_result), True)
+        self.assertEqual(rdflib.compare.isomorphic(g, g_result), True)
 
 
 if __name__ == '__main__':

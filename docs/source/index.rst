@@ -21,8 +21,6 @@ DataFrame to Graph conversion.
 
 For more details and the source code see https://github.com/cadmiumkitty/rdfpandas/
 
-We run Semantic Web London meetup https://www.meetup.com/semantic-web-london/
-
 Indices and tables
 ==================
 
